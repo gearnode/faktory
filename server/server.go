@@ -288,7 +288,8 @@ func (s *Server) processLines(conn *Connection) {
 			conn.Close()
 			return
 		}
-		if s.closed {
+
+		if s.GetCloseState() {
 			_ = conn.Error("Closing connection", fmt.Errorf("Shutdown in progress"))
 			_ = conn.Close()
 			return
@@ -313,6 +314,13 @@ func (s *Server) processLines(conn *Connection) {
 			break
 		}
 	}
+}
+
+func (s *Server) GetCloseState() bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	return s.closed
 }
 
 func (s *Server) uptimeInSeconds() int {
